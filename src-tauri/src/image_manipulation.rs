@@ -27,7 +27,7 @@ pub trait Image {
 }
 
 pub struct ImageWrapper {
-    pub buffer: ImageBuffer<image::Rgb<f32>, Vec<f32>>,
+    pub buffer: ImageBuffer<image::Rgb<u8>, Vec<u8>>,
     pub width: u32,
     pub height: u32,
 }
@@ -36,7 +36,7 @@ impl Image for ImageWrapper {
     type Output = ImageWrapper;
     
     fn new(width: u32, height: u32) -> Self {
-        let blank_image = ImageBuffer::from_pixel(width, height, image::Rgb([0.0, 0.0, 0.0]));
+        let blank_image = ImageBuffer::from_pixel(width, height, image::Rgb([0, 0, 0]));
         
         ImageWrapper {
             buffer: blank_image,
@@ -46,15 +46,15 @@ impl Image for ImageWrapper {
     }
 
     fn from_path(path: &str) -> Result<Self, Box<dyn Error>> {
-        let reader = ImageReader::open(path).unwrap();
-        let image = reader.decode().unwrap();
-        let rgb_image = image.as_rgb32f().unwrap();
+        let reader = ImageReader::open(path)?;
+        let image = reader.decode()?;
+        let rgb_image = image.to_rgb8();
         
         Ok(
             ImageWrapper {
                 buffer: rgb_image.clone(),
-                width: rgb_image.width(),
-                height: rgb_image.height(),
+                width: image.width(),
+                height: image.height(),
             }
         )
     }
@@ -65,14 +65,17 @@ impl Image for ImageWrapper {
 }
 
 
-fn get_pixel_brightness(pixel: &image::Rgb<f32>) -> u32 {
+fn get_pixel_brightness(pixel: &image::Rgb<u8>) -> u32 {
     let (red, green, blue) = (pixel[0], pixel[1], pixel[2]);
-    let brightness = 0.2126 * red + 0.7152 * green + 0.0722 * blue;
+    let brightness = 
+        0.2126 * red as f32 + 
+        0.7152 * green as f32 + 
+        0.0722 * blue as f32;
     
     brightness.round() as u32
 }
 
-fn pixel_to_char(pixel: &image::Rgb<f32>) -> char {
+fn pixel_to_char(pixel: &image::Rgb<u8>) -> char {
     match get_pixel_brightness(pixel) {
         0..=31 => CHAR_MAPPING[0],
         32..=62 => CHAR_MAPPING[1],
@@ -113,12 +116,12 @@ pub fn convert_to_char_image(image_wrapper: ImageWrapper) -> Vec<Vec<char>> {
 
 #[test]
 fn pixel_to_char_test() {
-    let pixel_1 = image::Rgb([0.0, 0.0, 0.0]);        
-    let pixel_2 = image::Rgb([10.0, 10.0, 10.0]);     
-    let pixel_3 = image::Rgb([70.0, 65.0, 80.0]);     
-    let pixel_4 = image::Rgb([190.0, 170.0, 255.0]);  
-    let pixel_5 = image::Rgb([230.0, 230.0, 230.0]);  
-    let pixel_6 = image::Rgb([255.0, 255.0, 255.0]);
+    let pixel_1 = image::Rgb([0, 0, 0]);        
+    let pixel_2 = image::Rgb([10, 10, 10]);     
+    let pixel_3 = image::Rgb([70, 65, 80]);     
+    let pixel_4 = image::Rgb([190, 170, 255]);  
+    let pixel_5 = image::Rgb([230, 230, 230]);  
+    let pixel_6 = image::Rgb([255, 255, 255]);
     
     let pixel_char_1 = pixel_to_char(&pixel_1);
     let pixel_char_2 = pixel_to_char(&pixel_2);
@@ -133,4 +136,43 @@ fn pixel_to_char_test() {
     assert_eq!(pixel_char_4, CHAR_MAPPING[5]);  // -> 'X'
     assert_eq!(pixel_char_5, CHAR_MAPPING[7]);  // -> '@'
     assert_eq!(pixel_char_6, CHAR_MAPPING[7]);  // -> '@'
+}
+
+#[test]
+fn e2e_image_conversion_test() {
+    let path = "test/test_image.png";
+    let red_pixel_indexes: Vec<u32> = (0..30).collect();
+    let green_pixel_indexes: Vec<u32> = (30..70).collect();
+    let blue_pixel_indexes: Vec<u32> = (70..100).collect();
+    let white_pixel_index: u32 = 22;
+    let black_pixel_index: u32 = 56;
+    
+    let image_wrapper = ImageWrapper::from_path(path).unwrap();
+    let text_image = convert_to_char_image(image_wrapper);
+    
+    let mut char_counter: u32 = 0;
+    for row in text_image {
+        for character in row {
+            if black_pixel_index == char_counter {
+                assert_eq!(character, CHAR_MAPPING[0]);
+                
+            } else if white_pixel_index == char_counter {
+                assert_eq!(character, CHAR_MAPPING[7]);
+                
+            } else if red_pixel_indexes.contains(&char_counter) {
+                assert_eq!(character, CHAR_MAPPING[2]);
+                
+            } else if green_pixel_indexes.contains(&char_counter) {
+                assert_eq!(character, CHAR_MAPPING[5]);
+                
+            } else if blue_pixel_indexes.contains(&char_counter) {
+                assert_eq!(character, CHAR_MAPPING[0]);
+                
+            } else {
+                panic!("char index was out of range!");
+            }
+            
+            char_counter = char_counter + 1;
+        }
+    }
 }
