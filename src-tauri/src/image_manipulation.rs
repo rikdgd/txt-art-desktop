@@ -1,9 +1,9 @@
-use image::Pixel;
-use png::{Decoder, OutputInfo};
-use image::{self, io::Reader as ImageReader, ImageBuffer};
-use std::fs::File;
-use std::thread;
-use std::sync::mpsc;
+use std::error::Error;
+use image::{
+    self, 
+    io::Reader as ImageReader, 
+    ImageBuffer
+};
 
 
 
@@ -19,11 +19,12 @@ const CHAR_MAPPING: [char; 8] = [
 ];
 
 pub trait Image {
-    fn new() -> Self;
-    fn from_path(path: &str) -> Self;
+    type Output;
+    
+    fn new(width: u32, height: u32) -> Self;
+    fn from_path(path: &str) -> Result<Self::Output, Box<dyn Error>>;
     fn dimentions(&self) -> (u32, u32);
 }
-
 
 pub struct ImageWrapper {
     pub buffer: ImageBuffer<image::Rgb<f32>, Vec<f32>>,
@@ -32,31 +33,41 @@ pub struct ImageWrapper {
 }
 
 impl Image for ImageWrapper {
-    fn new() -> Self {
-        todo!()
+    type Output = ImageWrapper;
+    
+    fn new(width: u32, height: u32) -> Self {
+        let blank_image = ImageBuffer::from_pixel(width, height, image::Rgb([0.0, 0.0, 0.0]));
+        
+        ImageWrapper {
+            buffer: blank_image,
+            width,
+            height,
+        }
     }
 
-    fn from_path(path: &str) -> Self {
+    fn from_path(path: &str) -> Result<Self, Box<dyn Error>> {
         let reader = ImageReader::open(path).unwrap();
         let image = reader.decode().unwrap();
         let rgb_image = image.as_rgb32f().unwrap();
         
-        ImageWrapper {
-            buffer: rgb_image.clone(),
-            width: rgb_image.width(),
-            height: rgb_image.height(),
-        }
+        Ok(
+            ImageWrapper {
+                buffer: rgb_image.clone(),
+                width: rgb_image.width(),
+                height: rgb_image.height(),
+            }
+        )
     }
 
     fn dimentions(&self) -> (u32, u32) {
-        todo!()
+        (self.width, self.height)
     }
 }
 
 
 fn get_pixel_brightness(pixel: &image::Rgb<f32>) -> u32 {
-    let (Red, Green, Blue) = (pixel[0], pixel[1], pixel[2]);
-    let brightness = 0.2126 * Red + 0.7152 * Green + 0.0722 * Blue;
+    let (red, green, blue) = (pixel[0], pixel[1], pixel[2]);
+    let brightness = 0.2126 * red + 0.7152 * green + 0.0722 * blue;
     
     brightness.round() as u32
 }
