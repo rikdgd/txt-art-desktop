@@ -104,9 +104,9 @@ pub fn convert_to_char_image(image_wrapper: ImageWrapper) -> Vec<Vec<char>> {
             text_image.push(text_image_row);
             text_image_row = Vec::new();
             row_counter = 0;
+        } else {
+            row_counter = row_counter + 1;
         }
-        
-        row_counter = row_counter + 1;
     }
     
     text_image
