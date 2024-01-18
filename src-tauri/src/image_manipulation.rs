@@ -2,7 +2,7 @@ use std::error::Error;
 use image::{
     self, 
     io::Reader as ImageReader, 
-    ImageBuffer
+    ImageBuffer, imageops::FilterType
 };
 
 
@@ -64,6 +64,22 @@ impl Image for ImageWrapper {
     }
 }
 
+impl ImageWrapper {
+    pub fn prepare_scale(&mut self) {
+        // Since monospace font characters are approximately twice as high
+        // as they are wide, we should half the image's height for a good looking result.
+        let new_height = self.height / 2;
+        let new_buffer = image::imageops::resize(
+            &self.buffer, 
+            self.width, 
+            new_height, 
+            FilterType::Gaussian
+        );
+
+        self.buffer = new_buffer;
+    }
+}
+
 
 fn get_pixel_brightness(pixel: &image::Rgb<u8>) -> u32 {
     let (red, green, blue) = (pixel[0], pixel[1], pixel[2]);
@@ -89,7 +105,8 @@ fn pixel_to_char(pixel: &image::Rgb<u8>) -> char {
     }
 }
 
-pub fn convert_to_char_image(image_wrapper: ImageWrapper) -> Vec<Vec<char>> {
+pub fn convert_to_char_image(image_wrapper: &mut ImageWrapper) -> Vec<Vec<char>> {
+    image_wrapper.prepare_scale();
     let pixels = image_wrapper.buffer.pixels();
     
     let mut text_image: Vec<Vec<char>> = Vec::new();
@@ -147,8 +164,8 @@ fn e2e_image_conversion_test() {
     let white_pixel_index: u32 = 22;
     let black_pixel_index: u32 = 56;
     
-    let image_wrapper = ImageWrapper::from_path(path).unwrap();
-    let text_image = convert_to_char_image(image_wrapper);
+    let mut image_wrapper = ImageWrapper::from_path(path).unwrap();
+    let text_image = convert_to_char_image(&mut image_wrapper);
     
     let mut char_counter: u32 = 0;
     for row in text_image {
