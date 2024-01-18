@@ -105,8 +105,12 @@ fn pixel_to_char(pixel: &image::Rgb<u8>) -> char {
     }
 }
 
-pub fn convert_to_char_image(image_wrapper: &mut ImageWrapper) -> Vec<Vec<char>> {
-    image_wrapper.prepare_scale();
+pub fn convert_to_char_image(image_wrapper: &mut ImageWrapper, scale_options: ImageScaleOptions) -> Vec<Vec<char>> {
+    
+    if let ImageScaleOptions::HalfHeight = scale_options {
+        image_wrapper.prepare_scale();
+    }
+
     let pixels = image_wrapper.buffer.pixels();
     
     let mut text_image: Vec<Vec<char>> = Vec::new();
@@ -127,6 +131,13 @@ pub fn convert_to_char_image(image_wrapper: &mut ImageWrapper) -> Vec<Vec<char>>
     }
     
     text_image
+}
+
+#[derive(Default)]
+pub enum ImageScaleOptions {
+    None,
+    #[default]
+    HalfHeight,
 }
 
 
@@ -165,25 +176,25 @@ fn e2e_image_conversion_test() {
     let black_pixel_index: u32 = 56;
     
     let mut image_wrapper = ImageWrapper::from_path(path).unwrap();
-    let text_image = convert_to_char_image(&mut image_wrapper);
+    let text_image = convert_to_char_image(&mut image_wrapper, ImageScaleOptions::None);
     
     let mut char_counter: u32 = 0;
     for row in text_image {
         for character in row {
             if black_pixel_index == char_counter {
-                assert_eq!(character, CHAR_MAPPING[0]);
+                assert_eq!(character, CHAR_MAPPING[0]); // 0 -> ' '
                 
             } else if white_pixel_index == char_counter {
-                assert_eq!(character, CHAR_MAPPING[7]);
+                assert_eq!(character, CHAR_MAPPING[7]); // 7 -> '@'
                 
             } else if red_pixel_indexes.contains(&char_counter) {
-                assert_eq!(character, CHAR_MAPPING[2]);
+                assert_eq!(character, CHAR_MAPPING[2]); // 2 => ':'
                 
             } else if green_pixel_indexes.contains(&char_counter) {
-                assert_eq!(character, CHAR_MAPPING[5]);
+                assert_eq!(character, CHAR_MAPPING[5]); // 5 -> 'X'
                 
             } else if blue_pixel_indexes.contains(&char_counter) {
-                assert_eq!(character, CHAR_MAPPING[0]);
+                assert_eq!(character, CHAR_MAPPING[0]); // 0 -> ' '
                 
             } else {
                 panic!("char index was out of range!");
