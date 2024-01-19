@@ -3,14 +3,9 @@
 
 mod image_manipulation;
 
-use std::error::Error;
 use image_manipulation::{Image, ImageWrapper, convert_to_char_image, ImageScaleOptions};
 
-// Learn more about Tauri commands at https://tauri.app/v1/guides/features/command
-#[tauri::command]
-fn greet(name: &str) -> String {
-    format!("Hello, {}! You've been greeted from Rust!", name)
-}
+
 
 #[tauri::command]
 fn get_char_image(path: &str) -> Vec<Vec<char>> {
@@ -24,7 +19,7 @@ fn get_char_image(path: &str) -> Vec<Vec<char>> {
 
 fn main() {
     tauri::Builder::default()
-        .invoke_handler(tauri::generate_handler![greet])
+        .invoke_handler(tauri::generate_handler![get_char_image])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
 }
