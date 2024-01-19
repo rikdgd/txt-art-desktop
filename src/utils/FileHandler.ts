@@ -4,7 +4,7 @@ import { open } from "@tauri-apps/api/dialog";
 
 class FileHandler {
     async selectFile() {
-        const path =  await open({
+        const path = await open({
             multiple: false,
             directory: false,
             filters: [{
