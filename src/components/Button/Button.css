@@ -1,0 +1,12 @@
+/* Style for the button */
+.MainButton {
+    background-color: #134bf2;
+    border-radius: 10px;
+    color: #eaede8;
+    padding: 10px 20px;
+    transition: background-color 0.3s ease;
+  }
+  .MainButton:hover {
+    background-color: #3768fc;
+  }
+  
