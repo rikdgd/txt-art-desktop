@@ -1,0 +1,8 @@
+.ImageHolder {
+    font-size: 12px;
+    font-family: "Monaco", monospace;
+    line-height: 120%;
+    margin: 10px;
+    white-space: pre;
+    background-color: rgb(31, 31, 32);
+}
