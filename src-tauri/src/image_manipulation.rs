@@ -105,7 +105,7 @@ fn pixel_to_char(pixel: &image::Rgb<u8>) -> char {
     }
 }
 
-pub fn convert_to_char_image(image_wrapper: &mut ImageWrapper, scale_options: ImageScaleOptions) -> Vec<Vec<char>> {
+fn convert_to_2d_charmatrix(image_wrapper: &mut ImageWrapper, scale_options: ImageScaleOptions) -> Vec<Vec<char>> {
     
     if let ImageScaleOptions::HalfHeight = scale_options {
         image_wrapper.prepare_scale();
@@ -131,6 +131,36 @@ pub fn convert_to_char_image(image_wrapper: &mut ImageWrapper, scale_options: Im
     }
     
     text_image
+}
+
+pub trait ImageConverter {
+    type ConvertsTo;
+    fn convert(&mut self) -> Self::ConvertsTo;
+}
+
+pub struct ImageToTextConverter {
+    pub image_wrapper: ImageWrapper,
+}
+
+impl ImageConverter for ImageToTextConverter {
+    type ConvertsTo = String;
+
+    fn convert(&mut self) -> Self::ConvertsTo {
+        let mut image_buffer = String::new();
+        let image = convert_to_2d_charmatrix(
+            &mut self.image_wrapper, 
+            ImageScaleOptions::default()
+        );
+
+        for row in image {
+            for character in row {
+                image_buffer.push(character);
+            }
+            image_buffer.push('\n');
+        }
+
+        image_buffer
+    }
 }
 
 #[derive(Default)]
@@ -176,7 +206,7 @@ fn e2e_image_conversion_test() {
     let black_pixel_index: u32 = 56;
     
     let mut image_wrapper = ImageWrapper::from_path(path).unwrap();
-    let text_image = convert_to_char_image(&mut image_wrapper, ImageScaleOptions::None);
+    let text_image = convert_to_2d_charmatrix(&mut image_wrapper, ImageScaleOptions::None);
     
     let mut char_counter: u32 = 0;
     for row in text_image {

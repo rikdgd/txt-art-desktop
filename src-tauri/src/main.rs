@@ -3,17 +3,20 @@
 
 mod image_manipulation;
 
-use image_manipulation::{Image, ImageWrapper, convert_to_char_image, ImageScaleOptions};
+use image_manipulation::{Image, ImageWrapper, ImageConverter, ImageToTextConverter, ImageScaleOptions};
 
 
 
 #[tauri::command]
-fn get_char_image(path: &str) -> Vec<Vec<char>> {
+fn get_char_image(path: &str) -> String {
     if let Ok(mut image_wrapper) = ImageWrapper::from_path(path) {
-        return convert_to_char_image(&mut image_wrapper, ImageScaleOptions::default());
+        let mut converter = ImageToTextConverter { image_wrapper };
+        return converter.convert();
+
     } else {
         let mut image_wrapper = ImageWrapper::new(10, 10);
-        return convert_to_char_image(&mut image_wrapper, ImageScaleOptions::default());
+        let mut converter = ImageToTextConverter { image_wrapper };
+        return converter.convert();
     }
 }
 
