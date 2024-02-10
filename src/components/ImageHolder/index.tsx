@@ -1,8 +1,10 @@
+import { useState, useEffect } from 'react';
 import './ImageHolder.css';
 
 
 function ImageHolder({ image }: { image: string | null}) {
-    
+
+    const [textImage, setTextImage] = useState('');
     const testImage = `
     ...........................................::HXXXXXXXXHX+:+++HXXH:.......................::+++++++++
     ..........................................::HX####XXXHHH++++HHX##X+.........................:::+++++
@@ -56,25 +58,23 @@ function ImageHolder({ image }: { image: string | null}) {
     :...............................:.....:.... ...............::....:::++++++HHHHXXXXXXXXXXXXXXXXXXX###
     `;
     
+    useEffect(() => {
+        if(image) {
+            setTextImage(image);
+        } else {
+            setTextImage(testImage);
+        }
+    }, [image]);
     
     
-    if(image) {
-        return(
-            <div>
-                <p className="ImageHolder">
-                    {image}
-                </p>
-            </div>
-        );
-    } else {
-        return(
-            <div>
-                <p className="ImageHolder">
-                    {testImage}
-                </p>
-            </div>
-        );
-    }
+
+    return(
+        <div>
+            <p className="ImageHolder">
+                {textImage}
+            </p>
+        </div>
+    );
 }
 
 

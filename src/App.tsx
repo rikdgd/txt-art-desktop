@@ -11,23 +11,18 @@ import ImageHolder from "./components/ImageHolder";
 function App() {
     
     const [imagePath, setImagePath] = useState('');
-    const [textImage, setTextImage] = useState('');
+    const [textImage, setTextImage] = useState<any>('');
 
     
     function getCharImage(path: string) {
-        let charImage: any;
-        
         invoke("get_char_image", { path })
             .then((message) => {
-                console.log(message);
-                charImage = message;
+                setTextImage(message);
             })
             .catch((e) => {
                 console.error(e);
-                charImage = e;
+                setTextImage(e);
             });
-        
-        setTextImage(charImage);
     }
     
     function selectImage() {
