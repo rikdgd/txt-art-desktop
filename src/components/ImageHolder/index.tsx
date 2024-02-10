@@ -5,6 +5,7 @@ import './ImageHolder.css';
 function ImageHolder({ image }: { image: string | null}) {
 
     const [textImage, setTextImage] = useState('');
+    const [fontSize, setFontSize] = useState(12);
     const testImage = `
     ...........................................::HXXXXXXXXHX+:+++HXXH:.......................::+++++++++
     ..........................................::HX####XXXHHH++++HHX##X+.........................:::+++++
@@ -65,12 +66,21 @@ function ImageHolder({ image }: { image: string | null}) {
             setTextImage(testImage);
         }
     }, [image]);
-    
-    
 
+
+    function onSliderChange(event: any) {
+        setFontSize(event.target.valueAsNumber);
+    }
+    
+    
+    
     return(
         <div>
-            <p className="ImageHolder">
+            <div>
+                <input type="range" min={1} max={100} value={fontSize} onChange={onSliderChange}/>
+            </div>
+
+            <p className="ImageHolder" style={{ fontSize: fontSize }}>
                 {textImage}
             </p>
         </div>
