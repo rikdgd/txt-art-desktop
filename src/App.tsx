@@ -4,6 +4,7 @@ import "./App.css";
 import Button from "./components/Button/Button";
 
 import fileHandler from "./utils/FileHandler";
+import ImageHolder from "./components/ImageHolder";
 
 
 
@@ -11,16 +12,19 @@ function App() {
     
     const [imagePath, setImagePath] = useState('');
     const [textImage, setTextImage] = useState('');
+
     
-    function getCharImage(path: string): undefined {
+    function getCharImage(path: string) {
         let charImage: any;
         
-        invoke("getCharImage", { path })
-            .then((data) => {
-                charImage = data;
+        invoke("get_char_image", { path })
+            .then((message) => {
+                console.log(message);
+                charImage = message;
             })
             .catch((e) => {
                 console.error(e);
+                charImage = e;
             });
         
         setTextImage(charImage);
@@ -43,6 +47,7 @@ function App() {
             <p>{imagePath}</p>
             <Button text='select image' OnClick={() => selectImage()}/>
             <Button text='convert image' OnClick={() => getCharImage(imagePath)}/>
+            <ImageHolder image={textImage}/>
         </div>
     );
 }
