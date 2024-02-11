@@ -2,7 +2,7 @@ use std::error::Error;
 use image::{
     self, 
     io::Reader as ImageReader, 
-    ImageBuffer
+    ImageBuffer, imageops::FilterType
 };
 
 
@@ -64,6 +64,22 @@ impl Image for ImageWrapper {
     }
 }
 
+impl ImageWrapper {
+    pub fn prepare_scale(&mut self) {
+        // Since monospace font characters are approximately twice as high
+        // as they are wide, we should half the image's height for a good looking result.
+        let new_height = self.height / 2;
+        let new_buffer = image::imageops::resize(
+            &self.buffer, 
+            self.width, 
+            new_height, 
+            FilterType::Gaussian
+        );
+
+        self.buffer = new_buffer;
+    }
+}
+
 
 fn get_pixel_brightness(pixel: &image::Rgb<u8>) -> u32 {
     let (red, green, blue) = (pixel[0], pixel[1], pixel[2]);
@@ -89,7 +105,12 @@ fn pixel_to_char(pixel: &image::Rgb<u8>) -> char {
     }
 }
 
-pub fn convert_to_char_image(image_wrapper: ImageWrapper) -> Vec<Vec<char>> {
+fn convert_to_2d_charmatrix(image_wrapper: &mut ImageWrapper, scale_options: ImageScaleOptions) -> Vec<Vec<char>> {
+    
+    if let ImageScaleOptions::HalfHeight = scale_options {
+        image_wrapper.prepare_scale();
+    }
+
     let pixels = image_wrapper.buffer.pixels();
     
     let mut text_image: Vec<Vec<char>> = Vec::new();
@@ -110,6 +131,43 @@ pub fn convert_to_char_image(image_wrapper: ImageWrapper) -> Vec<Vec<char>> {
     }
     
     text_image
+}
+
+pub trait ImageConverter {
+    type ConvertsTo;
+    fn convert(&mut self) -> Self::ConvertsTo;
+}
+
+pub struct ImageToTextConverter {
+    pub image_wrapper: ImageWrapper,
+}
+
+impl ImageConverter for ImageToTextConverter {
+    type ConvertsTo = String;
+
+    fn convert(&mut self) -> Self::ConvertsTo {
+        let mut image_buffer = String::new();
+        let image = convert_to_2d_charmatrix(
+            &mut self.image_wrapper, 
+            ImageScaleOptions::default()
+        );
+
+        for row in image {
+            for character in row {
+                image_buffer.push(character);
+            }
+            image_buffer.push('\n');
+        }
+
+        image_buffer
+    }
+}
+
+#[derive(Default)]
+pub enum ImageScaleOptions {
+    None,
+    #[default]
+    HalfHeight,
 }
 
 
@@ -147,26 +205,26 @@ fn e2e_image_conversion_test() {
     let white_pixel_index: u32 = 22;
     let black_pixel_index: u32 = 56;
     
-    let image_wrapper = ImageWrapper::from_path(path).unwrap();
-    let text_image = convert_to_char_image(image_wrapper);
+    let mut image_wrapper = ImageWrapper::from_path(path).unwrap();
+    let text_image = convert_to_2d_charmatrix(&mut image_wrapper, ImageScaleOptions::None);
     
     let mut char_counter: u32 = 0;
     for row in text_image {
         for character in row {
             if black_pixel_index == char_counter {
-                assert_eq!(character, CHAR_MAPPING[0]);
+                assert_eq!(character, CHAR_MAPPING[0]); // 0 -> ' '
                 
             } else if white_pixel_index == char_counter {
-                assert_eq!(character, CHAR_MAPPING[7]);
+                assert_eq!(character, CHAR_MAPPING[7]); // 7 -> '@'
                 
             } else if red_pixel_indexes.contains(&char_counter) {
-                assert_eq!(character, CHAR_MAPPING[2]);
+                assert_eq!(character, CHAR_MAPPING[2]); // 2 => ':'
                 
             } else if green_pixel_indexes.contains(&char_counter) {
-                assert_eq!(character, CHAR_MAPPING[5]);
+                assert_eq!(character, CHAR_MAPPING[5]); // 5 -> 'X'
                 
             } else if blue_pixel_indexes.contains(&char_counter) {
-                assert_eq!(character, CHAR_MAPPING[0]);
+                assert_eq!(character, CHAR_MAPPING[0]); // 0 -> ' '
                 
             } else {
                 panic!("char index was out of range!");
