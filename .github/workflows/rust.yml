@@ -17,7 +17,7 @@ jobs:
     steps:
     - uses: actions/checkout@v3
     - name: Change directory to Rust project
-      run: cd src-tauri
+      run: cd ./src-tauri/
     - name: check dir
       run: pwd
     - name: Build
