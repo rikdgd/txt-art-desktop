@@ -12,7 +12,7 @@ function App() {
     
     const [imagePath, setImagePath] = useState('');
     const [textImage, setTextImage] = useState<any>('');
-
+    
     
     function getCharImage(path: string) {
         invoke("get_char_image", { path })
