@@ -16,11 +16,9 @@ jobs:
 
     steps:
     - uses: actions/checkout@v3
-    - name: Change directory to Rust project
-      run: cd ./src-tauri/
-    - name: check dir
-      run: pwd
     - name: Build
+      working-directory: ./src-tauri
       run: cargo build --verbose
     - name: Run tests
+      working-directory: ./src-tauri
       run: cargo test --verbose
