@@ -80,7 +80,7 @@ function ImageHolder({ image }: { image: string | null}) {
                 <input type="range" min={1} max={100} value={fontSize} onChange={onSliderChange}/>
             </div>
 
-            <p className="ImageHolder" style={{ fontSize: fontSize }}>
+            <p className="ImageContainer" style={{ fontSize: fontSize }}>
                 {textImage}
             </p>
         </div>
