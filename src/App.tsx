@@ -3,6 +3,8 @@ import { invoke } from "@tauri-apps/api/tauri";
 import "./App.css";
 import Button from "./components/Button/Button";
 
+import { clipboard } from "@tauri-apps/api";
+
 import fileHandler from "./utils/FileHandler";
 import ImageHolder from "./components/ImageHolder";
 
@@ -36,12 +38,19 @@ function App() {
                 }
             })
     }
+
+    async function copyToClipboard() {
+        await clipboard.writeText(textImage);
+    }
+    
+    
     
     return (
         <div className="container">
             <p>{imagePath}</p>
             <Button text='select image' OnClick={() => selectImage()}/>
             <Button text='convert image' OnClick={() => getCharImage(imagePath)}/>
+            <Button text='copy to clipboard' OnClick={async () => copyToClipboard()}/>
             <ImageHolder image={textImage}/>
         </div>
     );
