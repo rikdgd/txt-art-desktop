@@ -46,12 +46,15 @@ function App() {
     
     
     return (
-        <div className="container">
-            <p>{imagePath}</p>
-            <Button text='select image' OnClick={() => selectImage()}/>
-            <Button text='convert image' OnClick={() => getCharImage(imagePath)}/>
-            <Button text='copy to clipboard' OnClick={async () => copyToClipboard()}/>
-            <ImageHolder image={textImage}/>
+        <div>
+            <div className="container">
+                <div className="ButtonRow">
+                    <Button text='select image' OnClick={() => selectImage()}/>
+                    <Button text='convert image' OnClick={() => getCharImage(imagePath)}/>
+                    <Button text='copy to clipboard' OnClick={async () => copyToClipboard()}/>
+                </div>
+                <ImageHolder image={textImage}/>
+            </div>
         </div>
     );
 }
