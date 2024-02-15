@@ -7,6 +7,7 @@ import { clipboard } from "@tauri-apps/api";
 
 import fileHandler from "./utils/FileHandler";
 import ImageHolder from "./components/ImageHolder";
+import OptionPanel from "./components/OptionPanel";
 
 
 
@@ -47,12 +48,15 @@ function App() {
     
     return (
         <div>
-            <div className="container">
-                <div className="ButtonRow">
+            <div>
+                <OptionPanel>
                     <Button text='select image' OnClick={() => selectImage()}/>
                     <Button text='convert image' OnClick={() => getCharImage(imagePath)}/>
                     <Button text='copy to clipboard' OnClick={async () => copyToClipboard()}/>
-                </div>
+                </OptionPanel>
+            </div>
+            
+            <div className="container">
                 <ImageHolder image={textImage}/>
             </div>
         </div>

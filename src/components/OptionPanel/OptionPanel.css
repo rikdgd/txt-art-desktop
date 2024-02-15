@@ -1,0 +1,25 @@
+.OptionPanel {
+    background-color: #353749;
+    margin: 4px;
+    border-radius: 10px;
+
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    align-items: flex-end;
+    padding: 10px;
+
+
+    position: fixed;
+    top: 2%;
+    left: auto;
+    right: 2%;
+    bottom: auto;
+    gap: 14px;
+}
+
+img {
+    width: 24px;
+    height: 24px;
+    filter: invert(80%);
+}
