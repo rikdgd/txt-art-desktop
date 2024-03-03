@@ -1,7 +1,13 @@
-.logo.vite:hover {
-  filter: drop-shadow(0 0 2em #747bff);
-}
+.ButtonRow {
+    background-color: #353749;
+    margin: 4px;
+    border-radius: 10px;
 
-.logo.react:hover {
-  filter: drop-shadow(0 0 2em #61dafb);
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    padding-left: 20%;
+    padding-right: 20%;
+    padding-top: 14px;
+    padding-bottom: 14px;
 }
