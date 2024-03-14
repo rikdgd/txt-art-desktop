@@ -6,9 +6,9 @@ import { useState } from 'react';
 
 
 function OptionPanel({ children }: { children: React.ReactNode }) {
-
+    
     const [isCollapsed, setIsCollapsed] = useState(false);
-
+    
     if (isCollapsed) {
         return (
             <div className="OptionPanel">

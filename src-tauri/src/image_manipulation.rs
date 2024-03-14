@@ -65,9 +65,9 @@ impl Image for ImageWrapper {
 }
 
 impl ImageWrapper {
+    /// Scales the image to half its height since most monospace fonts are approximately twice as high as they are wide.
+    /// This should be used for a good looking result, even though some data is lost.
     pub fn prepare_scale(&mut self) {
-        // Since monospace font characters are approximately twice as high
-        // as they are wide, we should half the image's height for a good looking result.
         let new_height = self.height / 2;
         let new_buffer = image::imageops::resize(
             &self.buffer, 
@@ -76,6 +76,21 @@ impl ImageWrapper {
             FilterType::Gaussian
         );
 
+        self.buffer = new_buffer;
+    }
+    
+    /// Scales the image by the given factor, lower than 1.0 will scale down, higher than 1.0 will scale up.
+    pub fn scale(&mut self, scale_factor_x: f32, scale_factor_y: f32) {
+        let new_width = (self.width as f32 * scale_factor_x) as u32;
+        let new_height = (self.height as f32 * scale_factor_y) as u32;
+        
+        let new_buffer = image::imageops::resize(
+            &self.buffer,
+            new_width,
+            new_height,
+            FilterType::Gaussian
+        );
+        
         self.buffer = new_buffer;
     }
 }
